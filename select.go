@@ -116,24 +116,27 @@ type Key struct {
 // text/template syntax. Custom state, colors and background color are available for use inside
 // the templates and are documented inside the Variable section of the docs.
 //
-// Examples
+// # Examples
 //
 // text/templates use a special notation to display programmable content. Using the double bracket notation,
 // the value can be printed with specific helper functions. For example
 //
 // This displays the value given to the template as pure, unstylized text. Structs are transformed to string
 // with this notation.
-// 	'{{ . }}'
+//
+//	'{{ . }}'
 //
 // This displays the name property of the value colored in cyan
-// 	'{{ .Name | cyan }}'
+//
+//	'{{ .Name | cyan }}'
 //
 // This displays the label property of value colored in red with a cyan background-color
-// 	'{{ .Label | red | cyan }}'
+//
+//	'{{ .Label | red | cyan }}'
 //
 // See the doc of text/template for more info: https://golang.org/pkg/text/template/
 //
-// Notes
+// # Notes
 //
 // Setting any of these templates will remove the icons from the default templates. They must
 // be added back in each of their specific templates. The styles.go constants contains the default icons.
@@ -498,6 +501,9 @@ type SelectWithAdd struct {
 	// AddLabel as the first item of the list.
 	Items []string
 
+	// Size is the number of items that should appear on the select before scrolling is necessary. Defaults to 5.
+	Size int
+
 	// AddLabel is the label used for the first item of the list that enables adding a new item.
 	// Selecting this item in the list displays the add item prompt using promptui/prompt.
 	AddLabel string
@@ -528,7 +534,11 @@ func (sa *SelectWithAdd) Run() (int, string, error) {
 	if len(sa.Items) > 0 {
 		newItems := append([]string{sa.AddLabel}, sa.Items...)
 
-		list, err := list.New(newItems, 5)
+		if sa.Size == 0 {
+			sa.Size = 5
+		}
+
+		list, err := list.New(newItems, sa.Size)
 		if err != nil {
 			return 0, "", err
 		}
@@ -538,7 +548,7 @@ func (sa *SelectWithAdd) Run() (int, string, error) {
 			Items:     newItems,
 			IsVimMode: sa.IsVimMode,
 			HideHelp:  sa.HideHelp,
-			Size:      5,
+			Size:      sa.Size,
 			list:      list,
 			Pointer:   sa.Pointer,
 		}
